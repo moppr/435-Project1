@@ -127,20 +127,24 @@ class BSTRec:
             output += self.inorder(node.right)
         return output
 
+    def sort(self, values=None):
+        if values:
+            for value in values:
+                self.insert_rec(value)
+        print(', '.join(self.inorder()), end='\n\n')
+
 
 if __name__ == "__main__":
     # testing each of the functions
     bst = BSTRec()
-    for x in [15, 3, 2, 6, 8, 11, 9, 4, 16]:
-        bst.insert_rec(x)
     print('whole tree')
-    print(', '.join(bst.inorder()), end='\n\n')
+    bst.sort([15, 3, 2, 6, 8, 11, 9, 4, 16])
     bst.delete_rec(6)
     bst.delete_rec(8)
     bst.delete_rec(3)
     bst.delete_rec(11)
     print('delete 6, 8, 3, 11')
-    print(', '.join(bst.inorder()), end='\n\n')
+    bst.sort()
     print('root', bst.root)
     print('max', bst.find_max_rec(bst.root))
     print('min', bst.find_min_rec(bst.root))
