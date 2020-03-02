@@ -89,7 +89,7 @@ class BSTRec:
         # providing value only used for user calls, providing value and node used by delete function
         if not node:
             node = self.find(value)
-            # if value not found in tree, the algorithm can't work (loops endlessly)
+            # if value not found in tree, the algorithm can't work (recurses endlessly)
             # so the operation is illegal
             if not node:
                 raise ValueError("Cannot find_next value that does not exist in the tree")
@@ -120,7 +120,7 @@ class BSTRec:
         # providing value only used for user calls
         if not node:
             node = self.find(value)
-            # if value not found in tree, the algorithm can't work (loops endlessly)
+            # if value not found in tree, the algorithm can't work (recurses endlessly)
             # so the operation is illegal
             if not node:
                 raise ValueError("Cannot find_prev value that does not exist in the tree")
