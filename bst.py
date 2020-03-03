@@ -48,6 +48,10 @@ class BSTRec:
         if not node:
             node = self.root
 
+        # nothing to delete on an empty tree
+        if not self.root:
+            raise ValueError("Cannot delete value that does not exist in the tree")
+
         # if the value is not equal to the current node, recursively call delete
         # on the appropriate child and point the resulting new root to be the new
         # child of the current node, and return the current node
@@ -67,7 +71,7 @@ class BSTRec:
         # if the value is equal to the current node, if it has no children, delete the node and return None
         if not node.left and not node.right:
             node = None
-            return
+            return None
         # if it has one child, delete the node and return the child
         elif node.left and not node.right:
             temp = node.left
@@ -152,6 +156,10 @@ class BSTRec:
         if not node:
             node = self.root
 
+        # manually handle empty tree
+        if not self.root:
+            return None
+
         # return a recursive call on the left child if there is one, else return the current node
         return self.find_min_rec(node.left) if node.left else node
 
@@ -159,6 +167,10 @@ class BSTRec:
         # any calls with no node given start from root
         if not node:
             node = self.root
+
+        # manually handle empty tree
+        if not self.root:
+            return None
 
         # return a recursive call on the right child if there is one, else return the current node
         return self.find_max_rec(node.right) if node.right else node
@@ -194,6 +206,10 @@ class BSTRec:
         if not node:
             node = self.root
 
+        # manually handle empty tree
+        if not self.root:
+            return []
+
         # return in-order traversal as array, used for string representation of whole tree
         output = []
         if node.left:
@@ -219,7 +235,8 @@ class BSTIter:
 '''
 
 if __name__ == "__main__":
-    # testing each of the functions
+    # some demo code to display each of the functions in action
+    # https://i.imgur.com/ySfT1lJ.png
     bst = BSTRec()
     print('generate whole tree')
     bst.sort([15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16])
