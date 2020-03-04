@@ -1,15 +1,7 @@
-from bst import *
+from bst import BST
 
-bst = BSTRec()
-try:
-    bst.delete_rec(5)
-except ValueError:
-    print('deletion from empty tree caught')
-
-try:
-    bst.find_next_rec(5)
-except ValueError:
-    print('find_next from empty tree caught')
-
-print('find_min from empty tree:', bst.find_min_rec())
-print('empty tree print:', bst)
+bst = BST()
+bst.sort([15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16])
+bst.delete_iter(8)
+bst.delete_iter(10)
+print(bst)

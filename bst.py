@@ -8,7 +8,7 @@ class Node:
         return str(self.value)
 
 
-class BSTRec:
+class BST:
 
     def __init__(self):
         self.root = None
@@ -41,7 +41,7 @@ class BSTRec:
                 self.insert_rec(value, node.right)
         # adding an existing value is illegal
         else:
-            raise ValueError("Cannot insert value that already exists in the tree")
+            raise ValueError(f"Cannot insert value {value} that already exists in the tree")
 
     def delete_rec(self, value, node=None):
         # any calls with no node given start from root
@@ -50,7 +50,7 @@ class BSTRec:
 
         # nothing to delete on an empty tree
         if not self.root:
-            raise ValueError("Cannot delete value that does not exist in the tree")
+            raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
 
         # if the value is not equal to the current node, recursively call delete
         # on the appropriate child and point the resulting new root to be the new
@@ -58,13 +58,13 @@ class BSTRec:
         if value < node.value:
             # deleting nonexistent value is illegal
             if not node.left:
-                raise ValueError("Cannot delete value that does not exist in the tree")
+                raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
             node.left = self.delete_rec(value, node.left)
             return node
         elif value > node.value:
             # deleting nonexistent value is illegal
             if not node.right:
-                raise ValueError("Cannot delete value that does not exist in the tree")
+                raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
             node.right = self.delete_rec(value, node.right)
             return node
 
@@ -96,7 +96,7 @@ class BSTRec:
             # if value not found in tree, the algorithm can't work (recurses endlessly)
             # so the operation is illegal
             if not node:
-                raise ValueError("Cannot find_next value that does not exist in the tree")
+                raise ValueError(f"Cannot find_next value {value} that does not exist in the tree")
 
         # currently on the starting node
         if node.value == value:
@@ -127,7 +127,7 @@ class BSTRec:
             # if value not found in tree, the algorithm can't work (recurses endlessly)
             # so the operation is illegal
             if not node:
-                raise ValueError("Cannot find_prev value that does not exist in the tree")
+                raise ValueError(f"Cannot find_prev value {value} that does not exist in the tree")
 
         # currently on the starting node
         if node.value == value:
@@ -175,6 +175,96 @@ class BSTRec:
         # return a recursive call on the right child if there is one, else return the current node
         return self.find_max_rec(node.right) if node.right else node
 
+    # TODO: iter functions go here
+
+    # TODO: possibly root checks should be the first thing, before setting node
+
+    def insert_iter(self, value):
+        node = self.root
+
+        # create root if this is the first node in the tree
+        if not self.root:
+            self.root = Node(value)
+            return
+
+        while True:
+            # if the value is less than current and current does not already have a left child,
+            # set the left child to the value and return to indicate completion
+            # otherwise, move to the left child
+            if value < node.value:
+                if not node.left:
+                    node.left = Node(value)
+                    return
+                else:
+                    node = node.left
+            # if the value is greater than current and current does not already have a right child,
+            # set the right child to the value and return to indicate completion
+            # otherwise, move to the right child
+            elif value > node.value:
+                if not node.right:
+                    node.right = Node(value)
+                    return
+                else:
+                    node = node.right
+            # adding an existing value is illegal
+            else:
+                raise ValueError(f"Cannot insert value {value} that already exists in the tree")
+
+    def delete_iter(self, value):
+        node = self.root
+
+        # nothing to delete on an empty tree
+        if not self.root:
+            raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
+
+        # use find with the track_parent option to get both the node and its parent
+        node, parent = self.find(value, True)
+
+        if not node:
+            raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
+
+        parent_side = self.left_or_right(node.value, parent)
+
+        # if the node has no children
+        if not node.left and not node.right:
+            node = None  # why isn't this working???
+            # workaround
+            temp = None
+            if parent_side == 'left':
+                parent.left = temp
+            elif parent_side == 'right':
+                parent.right = temp
+            else:
+                raise ValueError("something is wrong while deleting with no child")
+        # one child
+        # TODO: this can be condensed, check first if it makes it too messy before proceeding though
+        elif node.left and not node.right:
+            temp = node.left
+            node = None
+            if parent_side == 'left':
+                parent.left = temp
+            elif parent_side == 'right':
+                parent.right = temp
+            else:
+                raise ValueError("something is wrong while deleting with one child")
+        elif node.right and not node.left:
+            temp = node.right
+            node = None
+            if parent_side == 'left':
+                parent.left = temp
+            elif parent_side == 'right':
+                parent.right = temp
+            else:
+                raise ValueError("something is wrong while deleting with one child")
+        else:
+            # TODO: implement two children case
+            pass
+
+        # return new root at the end
+        return self.root
+
+
+
     def sort(self, values, refresh=False):
         # optional refresh will wipe the tree and use values to start a new tree
         if refresh:
@@ -186,16 +276,30 @@ class BSTRec:
 
     # below this point are all helper functions that are not directly related to question 1 or 2
 
-    def find(self, value):
+    def left_or_right(self, value, parent):
+        # TODO: probably a better way to write this
+        if parent.left and value < parent.value:
+            return 'left' if value == parent.left.value else None
+        if parent.right and value > parent.value:
+            return 'right' if value == parent.right.value else None
+        return None
+
+    def find(self, value, track_parent=False):
         # simple iterative binary search to retrieve node given its value
         node = self.root
+        parent = None
         while node and value != node.value:
+            parent = node
             node = node.left if value < node.value else node.right
-        return node
+        # parent doesn't check by itself if it should exist, so nodes not found need to manually
+        # have parent set to None
+        if not node:
+            parent = None
+        return (node, parent) if track_parent else node
 
     def bulk_insert(self, values):
         for value in values:
-            self.insert_rec(value)
+            self.insert_iter(value)
 
     def bulk_delete(self, values):
         for value in values:
@@ -222,22 +326,11 @@ class BSTRec:
     def __str__(self):
         return ', '.join((str(node) for node in self.in_order(self.root)))
 
-'''
-class BSTIter:
-
-    def __init__(self):
-        self.root = None
-
-    def insert_iter(self, node):
-        if node:
-            curr = node
-        else
-'''
 
 if __name__ == "__main__":
     # some demo code to display each of the functions in action
     # https://i.imgur.com/ySfT1lJ.png
-    bst = BSTRec()
+    bst = BST()
     print('generate whole tree')
     bst.sort([15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16])
     print('root:', bst.root)
