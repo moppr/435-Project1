@@ -300,7 +300,7 @@ class BST:
         # however leaving it like that to match find_next_iter
         node = self.find(value) if not node else node
         if not node:
-            raise ValueError(f"Cannot find_next value {value} that does not exist in the tree")
+            raise ValueError(f"Cannot find_prev value {value} that does not exist in the tree")
 
         prev = None
 
@@ -354,11 +354,7 @@ class BST:
 
         return node
 
-    def sort(self, values, refresh=False, recursive=False):
-        # optional refresh will wipe the tree and use values to start a new tree
-        if refresh:
-            self.root = None
-
+    def sort(self, values, recursive=False):
         # bulk insert values and print the in-order traversal to sort them
         self.bulk_insert(values, recursive)
         print(self)
@@ -396,13 +392,13 @@ class BST:
                 self.delete_iter(value)
 
     def in_order(self, node=None):
-        # any calls with no node given start from root
-        if not node:
-            node = self.root
-
         # manually handle empty tree
         if not self.root:
             return []
+
+        # any calls with no node given start from root
+        if not node:
+            node = self.root
 
         # return in-order traversal as array, used for string representation of whole tree
         output = []
@@ -424,7 +420,7 @@ if __name__ == "__main__":
 
     # recursive methods
     print('generate whole tree')
-    bst.sort([15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16], False, True)
+    bst.sort([15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16], True)
     print('root:', bst.root)
     print('max:', bst.find_max_rec())
     print('min:', bst.find_min_rec())
