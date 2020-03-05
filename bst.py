@@ -22,6 +22,10 @@ class BST:
     def __init__(self):
         self.root = None
 
+    # TODO: double check notes if insert is supposed to return something
+    # TODO: make another pass on the comments - less verbose in some places, more in others
+    # TODO: implement isBSBST() and related methods in the context of this class
+
     def insert_rec(self, value, node=None):
         # any calls with no node given start from root
         if not node:

@@ -1,7 +1,6 @@
-from bst import BST
+from avl import AVL
 
-bst = BST()
+avl = AVL()
 arr = [15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16]
-bst.sort(arr)
-bst.delete_iter(6)
-print(bst)
+avl.sort(arr)
+print(avl.height(), avl.height(avl.root.left))
