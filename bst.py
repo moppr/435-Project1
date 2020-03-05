@@ -8,6 +8,15 @@ class Node:
         return str(self.value)
 
 
+def left_or_right(value, node):
+    # given a value, check if one of the children matches it, and return the child if so
+    if node.left and value < node.value:
+        return 'left' if value == node.left.value else None
+    if node.right and value > node.value:
+        return 'right' if value == node.right.value else None
+    return None
+
+
 class BST:
 
     def __init__(self):
@@ -44,13 +53,13 @@ class BST:
             raise ValueError(f"Cannot insert value {value} that already exists in the tree")
 
     def delete_rec(self, value, node=None):
-        # any calls with no node given start from root
-        if not node:
-            node = self.root
-
         # nothing to delete on an empty tree
         if not self.root:
             raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
+
+        # any calls with no node given start from root
+        if not node:
+            node = self.root
 
         # if the value is not equal to the current node, recursively call delete
         # on the appropriate child and point the resulting new root to be the new
@@ -152,40 +161,36 @@ class BST:
             return self.find_prev_rec(value, node.left, prev)
 
     def find_min_rec(self, node=None):
-        # any calls with no node given start from root
-        if not node:
-            node = self.root
-
         # manually handle empty tree
         if not self.root:
             return None
+
+        # any calls with no node given start from root
+        if not node:
+            node = self.root
 
         # return a recursive call on the left child if there is one, else return the current node
         return self.find_min_rec(node.left) if node.left else node
 
     def find_max_rec(self, node=None):
-        # any calls with no node given start from root
-        if not node:
-            node = self.root
-
         # manually handle empty tree
         if not self.root:
             return None
 
+        # any calls with no node given start from root
+        if not node:
+            node = self.root
+
         # return a recursive call on the right child if there is one, else return the current node
         return self.find_max_rec(node.right) if node.right else node
 
-    # TODO: iter functions go here
-
-    # TODO: possibly root checks should be the first thing, before setting node
-
     def insert_iter(self, value):
-        node = self.root
-
         # create root if this is the first node in the tree
         if not self.root:
             self.root = Node(value)
             return
+
+        node = self.root
 
         while True:
             # if the value is less than current and current does not already have a left child,
@@ -211,99 +216,184 @@ class BST:
                 raise ValueError(f"Cannot insert value {value} that already exists in the tree")
 
     def delete_iter(self, value):
-        node = self.root
-
         # nothing to delete on an empty tree
         if not self.root:
             raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
 
+        node = self.root
+
         # use find with the track_parent option to get both the node and its parent
         node, parent = self.find(value, True)
+        # figure out whether this is the left or right child we're working with
+        parent_side = left_or_right(node.value, parent) if parent else None
 
+        # can't delete if the node wasn't found
         if not node:
             raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
 
-        parent_side = self.left_or_right(node.value, parent)
+        while True:
 
-        # if the node has no children
-        if not node.left and not node.right:
-            node = None  # why isn't this working???
-            # workaround
-            temp = None
+            # if the node has no children, delete it
+            if not node.left and not node.right:
+                temp = None
+            # if the node has one child, save that child to give to its parent later
+            elif node.left and not node.right:
+                temp = node.left
+            elif node.right and not node.left:
+                temp = node.right
+            # if the node has two children, swap its value with the next value and
+            # delete the successor starting from its right child
+            else:
+                next = self.find_next_iter(node.value, node)
+                node.value = next.value
+                parent = node
+                parent_side = 'right'
+                node = node.right
+                value = next.value
+                continue
+
+            # set the parent's child to be the new value (None for 0 children, child for 1)
+            # if there is no parent, that means the 'child' is actually the whole tree's root
             if parent_side == 'left':
                 parent.left = temp
             elif parent_side == 'right':
                 parent.right = temp
             else:
-                raise ValueError("something is wrong while deleting with no child")
-        # one child
-        # TODO: this can be condensed, check first if it makes it too messy before proceeding though
-        elif node.left and not node.right:
-            temp = node.left
-            node = None
-            if parent_side == 'left':
-                parent.left = temp
-            elif parent_side == 'right':
-                parent.right = temp
-            else:
-                raise ValueError("something is wrong while deleting with one child")
-        elif node.right and not node.left:
-            temp = node.right
-            node = None
-            if parent_side == 'left':
-                parent.left = temp
-            elif parent_side == 'right':
-                parent.right = temp
-            else:
-                raise ValueError("something is wrong while deleting with one child")
-        else:
-            # TODO: implement two children case
-            pass
+                self.root = temp
+            break
 
         # return new root at the end
         return self.root
 
+    def find_next_iter(self, value, node=None):
+        # node can be set to specify a starting point, such as from delete function
+        node = self.find(value) if not node else node
+        if not node:
+            raise ValueError(f"Cannot find_next value {value} that does not exist in the tree")
 
+        next = None
 
-    def sort(self, values, refresh=False):
+        while True:
+            # if on the starting node, we're either ready to return or we need to start searching
+            if node.value == value:
+                # return appropriate result if we're done searching
+                if next:
+                    return next if next.value != value else None
+                # if there's a right child, the successor is the smallest in the right subtree
+                if node.right:
+                    return self.find_min_iter(node.right)
+                # otherwise, start searching from root
+                next = node
+                node = self.root
+            # if searching and we're on a larger node, save current value as the highest seen so far
+            # and move to its left child
+            elif node.value > value:
+                next = node
+                node = node.left
+            # if searching and we're on a smaller node, don't update highest value seen so far
+            # just move to the right child
+            elif node.value < value:
+                node = node.right
+
+    def find_prev_iter(self, value, node=None):
+        # note: should not be called with non-default value of node,
+        # however leaving it like that to match find_next_iter
+        node = self.find(value) if not node else node
+        if not node:
+            raise ValueError(f"Cannot find_next value {value} that does not exist in the tree")
+
+        prev = None
+
+        while True:
+            # if on the starting node, we're either ready to return or we need to start searching
+            if node.value == value:
+                # return appropriate result if we're done searching
+                if prev:
+                    return prev if prev.value != value else None
+                # if there's a left child, the successor is the largest in the left subtree
+                if node.left:
+                    return self.find_max_iter(node.left)
+                # otherwise, start searching from root
+                prev = node
+                node = self.root
+            # if searching and we're on a smaller node, save current value as the smallest seen so far
+            # and move to its right child
+            elif node.value < value:
+                prev = node
+                node = node.right
+            # if searching and we're on a larger node, don't update smallest value seen so far
+            # just move to the left child
+            elif node.value > value:
+                node = node.left
+
+    def find_min_iter(self, node=None):
+        # nothing to find on empty tree
+        if not self.root:
+            return None
+
+        # start from root unless otherwise specified
+        node = self.root if not node else node
+
+        # move left as much as possible
+        while node.left:
+            node = node.left
+
+        return node
+
+    def find_max_iter(self, node=None):
+        # nothing to find on empty tree
+        if not self.root:
+            return None
+
+        # start from root unless otherwise specified
+        node = self.root if not node else node
+
+        # move right as much as possible
+        while node.right:
+            node = node.right
+
+        return node
+
+    def sort(self, values, refresh=False, recursive=False):
         # optional refresh will wipe the tree and use values to start a new tree
         if refresh:
             self.root = None
 
         # bulk insert values and print the in-order traversal to sort them
-        self.bulk_insert(values)
+        self.bulk_insert(values, recursive)
         print(self)
 
     # below this point are all helper functions that are not directly related to question 1 or 2
-
-    def left_or_right(self, value, parent):
-        # TODO: probably a better way to write this
-        if parent.left and value < parent.value:
-            return 'left' if value == parent.left.value else None
-        if parent.right and value > parent.value:
-            return 'right' if value == parent.right.value else None
-        return None
 
     def find(self, value, track_parent=False):
         # simple iterative binary search to retrieve node given its value
         node = self.root
         parent = None
+
         while node and value != node.value:
             parent = node
             node = node.left if value < node.value else node.right
+
         # parent doesn't check by itself if it should exist, so nodes not found need to manually
         # have parent set to None
         if not node:
             parent = None
+
         return (node, parent) if track_parent else node
 
-    def bulk_insert(self, values):
+    def bulk_insert(self, values, recursive=False):
         for value in values:
-            self.insert_iter(value)
+            if recursive:
+                self.insert_rec(value)
+            else:
+                self.insert_iter(value)
 
-    def bulk_delete(self, values):
+    def bulk_delete(self, values, recursive=False):
         for value in values:
-            self.delete_rec(value)
+            if recursive:
+                self.delete_rec(value)
+            else:
+                self.delete_iter(value)
 
     def in_order(self, node=None):
         # any calls with no node given start from root
@@ -331,8 +421,10 @@ if __name__ == "__main__":
     # some demo code to display each of the functions in action
     # https://i.imgur.com/ySfT1lJ.png
     bst = BST()
+
+    # recursive methods
     print('generate whole tree')
-    bst.sort([15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16])
+    bst.sort([15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16], False, True)
     print('root:', bst.root)
     print('max:', bst.find_max_rec())
     print('min:', bst.find_min_rec())
@@ -344,16 +436,17 @@ if __name__ == "__main__":
     print('10 next:', bst.find_next_rec(10))
     print('18 prev:', bst.find_prev_rec(18))
 
+    # iterative methods
     print('\ndelete 7, 6, 22, 16, 15')
     bst.bulk_delete([7, 6, 22, 16, 15])
     print(bst)
     print('root:', bst.root)
-    print('max:', bst.find_max_rec())
-    print('min:', bst.find_min_rec())
+    print('max:', bst.find_max_iter())
+    print('min:', bst.find_min_iter())
     print('root left:', bst.root.left)
     print('root right:', bst.root.right)
-    print('root next:', bst.find_next_rec(bst.root.value))
-    print('root prev:', bst.find_prev_rec(bst.root.value))
-    print('20 next:', bst.find_next_rec(20))
-    print('10 next:', bst.find_next_rec(10))
-    print('17 prev:', bst.find_prev_rec(17))
+    print('root next:', bst.find_next_iter(bst.root.value))
+    print('root prev:', bst.find_prev_iter(bst.root.value))
+    print('20 next:', bst.find_next_iter(20))
+    print('10 next:', bst.find_next_iter(10))
+    print('17 prev:', bst.find_prev_iter(17))
