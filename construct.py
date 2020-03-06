@@ -1,6 +1,7 @@
 from bst import BST
 from avl import AVL
 from arrays import *
+from datetime import *
 
 if __name__ == "__main__":
     random_arr = get_random_array(10000)  # works up to 10mil on my PC
@@ -71,3 +72,25 @@ if __name__ == "__main__":
     except RecursionError:
         print("Maximum recursion depth exceeded for avl sorted iterative")
     avl.clear()
+
+    now = datetime.now()
+    bst.bulk_insert(random_arr)
+    bst.bulk_delete(random_arr)
+    print(f"{len(random_arr)} insert/delete on BST random took", datetime.now() - now)
+
+    now = datetime.now()
+    avl.bulk_insert(random_arr)
+    avl.bulk_delete(random_arr)
+    print(f"{len(random_arr)} insert/delete on AVL random took", datetime.now() - now)
+
+    now = datetime.now()
+    bst.bulk_insert(sorted_arr)
+    bst.bulk_delete(sorted_arr)
+    print(f"{len(sorted_arr)} insert/delete on BST sorted took", datetime.now() - now)
+
+    # something might be wrong based on the fact that this is a couple orders of magnitude too slow...
+    # will look into fixing soon
+    now = datetime.now()
+    avl.bulk_insert(sorted_arr)
+    avl.bulk_delete(sorted_arr)
+    print(f"{len(sorted_arr)} insert/delete on AVL sorted took", datetime.now() - now)
