@@ -187,30 +187,22 @@ class BST:
             self.root = Node(value)
             return
 
+        # start insertion from root
         node = self.root
+        parent = None
 
-        while True:
-            # if the value is less than current and current does not already have a left child,
-            # set the left child to the value and return to indicate completion
-            # otherwise, move to the left child
-            if value < node.value:
-                if not node.left:
-                    node.left = Node(value)
-                    return
-                else:
-                    node = node.left
-            # if the value is greater than current and current does not already have a right child,
-            # set the right child to the value and return to indicate completion
-            # otherwise, move to the right child
-            elif value > node.value:
-                if not node.right:
-                    node.right = Node(value)
-                    return
-                else:
-                    node = node.right
-            # adding an existing value is illegal
-            else:
-                raise ValueError(f"Cannot insert value {value} that already exists in the tree")
+        # search for appropriate spot to insert
+        while node:
+            parent = node
+            node = node.left if value < node.value else node.right
+
+        # perform insertion where applicable
+        if value < parent.value:
+            parent.left = Node(value)
+        elif value > parent.value:
+            parent.right = Node(value)
+        else:
+            raise ValueError(f"Cannot insert value {value} that already exists in the tree")
 
     def delete_iter(self, value):
         # nothing to delete on an empty tree
@@ -243,10 +235,10 @@ class BST:
                 node = node.right
                 value = next.value
 
-                # use find with the track_parent option to get both the node and its parent
-                if parent and parent.right.value != parent.value:
+                # ONLY update the parent value if there is at least one traversal to be done
+                # because otherwise we'll unintentionally go back to the whole tree's root and break stuff
+                if parent.right.value != parent.value:
                     node, parent = self.find(value, node, True)
-                # figure out whether this is the left or right child we're working with
                 parent_side = self.left_or_right(node.value, parent) if parent else None
                 continue
 
