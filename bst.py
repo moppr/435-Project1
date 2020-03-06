@@ -3,18 +3,11 @@ class Node:
     def __init__(self, value):
         self.value = value
         self.left = self.right = None
+        self.height = 0
+        # TODO: see if height is useful anywhere in BST
 
     def __str__(self):
         return str(self.value)
-
-
-def left_or_right(value, node):
-    # given a value, check if one of the children matches it, and return the child if so
-    if node.left and value < node.value:
-        return 'left' if value == node.left.value else None
-    if node.right and value > node.value:
-        return 'right' if value == node.right.value else None
-    return None
 
 
 class BST:
@@ -22,7 +15,7 @@ class BST:
     def __init__(self):
         self.root = None
 
-    # TODO: double check notes if insert is supposed to return something
+    # TODO: double check which methods are supposed to return something
     # TODO: make another pass on the comments - less verbose in some places, more in others
     # TODO: implement isBSBST() and related methods in the context of this class
 
@@ -224,19 +217,14 @@ class BST:
         if not self.root:
             raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
 
-        node = self.root
-
-        # use find with the track_parent option to get both the node and its parent
-        node, parent = self.find(value, True)
-        # figure out whether this is the left or right child we're working with
-        parent_side = left_or_right(node.value, parent) if parent else None
+        node, parent = self.find(value, self.root, True)
+        parent_side = self.left_or_right(node.value, parent) if parent else None
 
         # can't delete if the node wasn't found
         if not node:
             raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
 
         while True:
-
             # if the node has no children, delete it
             if not node.left and not node.right:
                 temp = None
@@ -254,6 +242,12 @@ class BST:
                 parent_side = 'right'
                 node = node.right
                 value = next.value
+
+                # use find with the track_parent option to get both the node and its parent
+                if parent and parent.right.value != parent.value:
+                    node, parent = self.find(value, node, True)
+                # figure out whether this is the left or right child we're working with
+                parent_side = self.left_or_right(node.value, parent) if parent else None
                 continue
 
             # set the parent's child to be the new value (None for 0 children, child for 1)
@@ -365,9 +359,9 @@ class BST:
 
     # below this point are all helper functions that are not directly related to question 1 or 2
 
-    def find(self, value, track_parent=False):
+    def find(self, value, node=None, track_parent=False):
         # simple iterative binary search to retrieve node given its value
-        node = self.root
+        node = self.root if not node else node
         parent = None
 
         while node and value != node.value:
@@ -412,6 +406,18 @@ class BST:
         if node.right:
             output += self.in_order(node.right)
         return output
+
+    # note: the following static method doesn't have default values like some other methods do
+    # because there is no context in which it would be called with no node specified
+
+    @staticmethod
+    def left_or_right(value, node):
+        # given a value, check if one of the children matches it, and return the child if so
+        if node.left and value == node.left.value:
+            return 'left'
+        if node.right and value == node.right.value:
+            return 'right'
+        return None
 
     def __str__(self):
         return ', '.join((str(node) for node in self.in_order(self.root)))
