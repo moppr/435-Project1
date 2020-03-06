@@ -14,6 +14,7 @@ class BST:
 
     def __init__(self):
         self.root = None
+        self.traversal_counter = 0
 
     # TODO: double check which methods are supposed to return something
     # TODO: make another pass on the comments - less verbose in some places, more in others
@@ -400,6 +401,12 @@ class BST:
             output += self.in_order(node.right)
         return output
 
+    def __str__(self):
+        return ', '.join((str(node) for node in self.in_order(self.root)))
+
+    def clear(self):
+        self.root = None
+
     # note: the following static method doesn't have default values like some other methods do
     # because there is no context in which it would be called with no node specified
 
@@ -411,9 +418,6 @@ class BST:
         if node.right and value == node.right.value:
             return 'right'
         return None
-
-    def __str__(self):
-        return ', '.join((str(node) for node in self.in_order(self.root)))
 
 
 if __name__ == "__main__":

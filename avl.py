@@ -178,8 +178,6 @@ class AVL(BST):
         node = self.root
         balance_factor = self.balance_factor(node)
 
-        # works up to here
-
         # left
         if balance_factor > 1:
             # extra step for left-right
@@ -199,13 +197,14 @@ class AVL(BST):
 
     def find(self, value, node=None, track_parents=False, decrement_path=False):
         # simple iterative binary search to retrieve node given its value
-        node = self.root if not node else node  # note: default value of node is not a possible call
+        node = self.root if not node else node
         parent = None
         parents = deque()
 
         while node and value != node.value:
             parents.appendleft(node)
             parent = node
+            # decrement_path used during deletion if swap was made (2+ children)
             if decrement_path:
                 node.height -= 1
             node = node.left if value < node.value else node.right
