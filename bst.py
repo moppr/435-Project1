@@ -185,6 +185,7 @@ class BST:
     def insert_iter(self, value):
         # create root if this is the first node in the tree
         if not self.root:
+            self.traversal_counter += 1
             self.root = Node(value)
             return
 
@@ -194,10 +195,12 @@ class BST:
 
         # search for appropriate spot to insert
         while node:
+            self.traversal_counter += 1
             parent = node
             node = node.left if value < node.value else node.right
 
         # perform insertion where applicable
+        self.traversal_counter += 1
         if value < parent.value:
             parent.left = Node(value)
         elif value > parent.value:

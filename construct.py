@@ -3,7 +3,7 @@ from avl import AVL
 from arrays import *
 
 if __name__ == "__main__":
-    random_arr = get_random_array(100000)  # works for 10mil on my PC
+    random_arr = get_random_array(10000)  # works up to 10mil on my PC
     sorted_arr = get_sorted_array(10000)
     bst = BST()
     avl = AVL()
@@ -18,6 +18,7 @@ if __name__ == "__main__":
     try:
         bst.bulk_insert(random_arr)
         print("bst random iterative success")
+        print(bst.traversal_counter)
     except RecursionError:
         print("Maximum recursion depth exceeded for bst random iterative")
     bst.clear()
@@ -34,6 +35,7 @@ if __name__ == "__main__":
     try:
         avl.bulk_insert(random_arr)
         print("avl random iterative success")
+        print(avl.traversal_counter)
     except RecursionError:
         print("Maximum recursion depth exceeded for avl random iterative")
     avl.clear()
@@ -48,6 +50,7 @@ if __name__ == "__main__":
     try:
         bst.bulk_insert(sorted_arr)
         print("bst sorted iterative success")
+        print(bst.traversal_counter)
     except RecursionError:
         print("Maximum recursion depth exceeded for bst sorted iterative")
     bst.clear()
@@ -64,6 +67,7 @@ if __name__ == "__main__":
     try:
         avl.bulk_insert(sorted_arr)
         print("avl sorted iterative success")
+        print(avl.traversal_counter)
     except RecursionError:
         print("Maximum recursion depth exceeded for avl sorted iterative")
     avl.clear()
