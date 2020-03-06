@@ -209,6 +209,8 @@ class BST:
         if not self.root:
             raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
 
+        # search for the node to delete and its parent starting from root
+        # and check which side of the parent the node is on
         node, parent = self.find(value, self.root, True)
         parent_side = self.left_or_right(node.value, parent) if parent else None
 
@@ -231,7 +233,6 @@ class BST:
                 next = self.find_next_iter(node.value, node)
                 node.value = next.value
                 parent = node
-                parent_side = 'right'
                 node = node.right
                 value = next.value
 
@@ -239,7 +240,7 @@ class BST:
                 # because otherwise we'll unintentionally go back to the whole tree's root and break stuff
                 if parent.right.value != parent.value:
                     node, parent = self.find(value, node, True)
-                parent_side = self.left_or_right(node.value, parent) if parent else None
+                parent_side = self.left_or_right(node.value, parent)
                 continue
 
             # set the parent's child to be the new value (None for 0 children, child for 1)
