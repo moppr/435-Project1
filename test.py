@@ -5,19 +5,23 @@ import random
 
 bst = BST()
 avl = AVL()
-arr = get_random_array(100)
+#arr = [63, 20, 65, 46, 48, 3, 62]
+arr = get_random_array(31)
 print(arr)
 
 
-'''bst.sort(arr)
-for _ in range(15):
+avl.sort(arr)
+for _ in range(29):
     n = random.choice(arr)
     arr.pop(arr.index(n))
-    bst.delete_iter(n)
-    print(n, '\n', bst, sep='')'''
+    avl.delete_iter(n)
+    print(n, '\n', avl.root.display(), sep='')
 
-avl.sort(arr)
-print('height:', avl.root.height)
+
+'''avl.sort(arr)
+avl.root.display()
+print('height:', avl.root.height)'''
+
 
 # confirms that tree is the height it claims to be
 '''node = avl.root
@@ -30,14 +34,15 @@ avl.delete_iter(arr[62])
 print(avl)
 print('height:', avl.root.height)'''
 
-for _ in range(100):
+'''for _ in range(100):
     n = random.choice(arr)
     arr.pop(arr.index(n))
     avl.delete_iter(n)
-    print(n, avl, avl.root.height if avl.root else -1, sep='\n')
+    print(n, avl, avl.root.height if avl.root else -1, sep='\n')'''
 
-avl.verify_height()
-
+'''avl.verify_height()
+print(avl.height_manual())
+'''
 
 '''avl.insert_iter(5)
 print(avl, avl.root.height)

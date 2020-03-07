@@ -10,6 +10,7 @@ class AVL(BST):
     # __init__, sort, all helper methods
 
     def insert_iter(self, value):
+        #print(f"inserting {value}...")
         # create root if this is the first node in the tree
         if not self.root:
             self.traversal_counter += 1
@@ -43,7 +44,8 @@ class AVL(BST):
             self.update_height(node)
 
         # rebalance the tree when done
-        self.rebalance(value)
+        for i, parent in enumerate(parents):
+            self.rebalance(parent, parents[i+1] if i+1 < len(parents) else None)
 
     def delete_iter(self, value):
         # nothing to delete on an empty tree
@@ -104,7 +106,8 @@ class AVL(BST):
             self.update_height(node)
 
         # rebalance the tree when done
-        return self.rebalance(value, True)
+        for i, parent in enumerate(parents):
+            self.rebalance(parent, parents[i + 1] if i + 1 < len(parents) else None)
 
     # below this point are all helper functions that are not directly related to question 4
 
@@ -154,48 +157,89 @@ class AVL(BST):
         # return height of left tree minus height of right tree
         return self.height(node.left) - self.height(node.right)
 
-    def left_rotate(self, old_root):
+    def left_rotate(self, old_root, local_root):
         # old root's right child becomes the new root and new root's left subtree becomes old root's right subtree
         new_root = old_root.right
         subtree = new_root.left
         old_root.right = subtree
         new_root.left = old_root
-        self.root = new_root
+        if local_root:
+            if new_root.value < local_root.value:
+                local_root.left = new_root
+            else:
+                local_root.right = new_root
+        else:
+            self.root = new_root
         self.update_height(old_root)
         self.update_height(new_root)
         return new_root
 
-    def right_rotate(self, old_root):
+    def right_rotate(self, old_root, local_root):
         # old root's left child becomes the new root and new root's right subtree becomes old root's left subtree
         new_root = old_root.left
         subtree = new_root.right
         old_root.left = subtree
         new_root.right = old_root
-        self.root = new_root
+        if local_root:
+            if new_root.value < local_root.value:
+                local_root.left = new_root
+            else:
+                local_root.right = new_root
+        else:
+            self.root = new_root
         self.update_height(old_root)
         self.update_height(new_root)
         return new_root
 
-    def rebalance(self, value, delete=False):
-        # all rebalances start from root
-        node = self.root
+    def rebalance2(self, node, value, delete=False):
         balance_factor = self.balance_factor(node)
 
-        # left
+        # left-heavy
         if balance_factor > 1:
             # extra step for left-right
             if (delete and self.balance_factor(node.left) < 0) or (not delete and value > node.left.value):
+                print("a")
                 node.left = self.left_rotate(node.left)
             # both left-left and left-right
+            print("b")
             return self.right_rotate(node)
-        # right
+        # right-heavy
         if balance_factor < -1:
             # extra step for right-left
             if (delete and self.balance_factor(node.right) > 0) or (not delete and value < node.right.value):
+                print("c")
                 node.right = self.right_rotate(node.right)
             # both right-right and right-left
+            print("d")
             return self.left_rotate(node)
         # no rebalance because tree is sufficiently balanced
+        print(f"tried to rebalance {node} with {value} but no high BF found")
+        return node
+
+    def rebalance(self, node, parent):
+        balance_factor = self.balance_factor(node)
+        #print(f"attempting rotate {node} {parent}")
+
+        # left-heavy
+        if balance_factor > 1:
+            # extra step for left-right
+            if self.balance_factor(node.left) < 0:
+                #print("LR")
+                node.left = self.left_rotate(node.left, node)
+            # both right-right and left-right
+            #print("RR or LR")
+            return self.right_rotate(node, parent)
+        # right-heavy
+        if balance_factor < -1:
+            # extra step for right-left
+            if self.balance_factor(node.right) > 0:
+                #print("RL")
+                node.right = self.right_rotate(node.right, node)
+            # both left-left and right-left
+            #print("LL or RL")
+            return self.left_rotate(node, parent)
+        # no rebalance because tree is sufficiently balanced
+        #print(f"tried to rebalance {node} but no high BF found")
         return node
 
     def find(self, value, node=None, track_parents=False, decrement_path=False):
