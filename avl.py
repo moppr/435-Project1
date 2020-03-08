@@ -9,8 +9,9 @@ class AVL(BST):
     # (4d) find_next_iter, find_prev_iter, find_min_iter, find_max_iter
     # __init__, sort, all helper methods
 
+    # TODO: implement recursive methods
+
     def insert_iter(self, value):
-        #print(f"inserting {value}...")
         # create root if this is the first node in the tree
         if not self.root:
             self.traversal_counter += 1
@@ -30,7 +31,7 @@ class AVL(BST):
             parent = node
             node = node.left if value < node.value else node.right
 
-        # perform insertion where applicable
+        # perform insertion if applicable
         self.traversal_counter += 1
         if value < parent.value:
             parent.left = Node(value)
@@ -39,24 +40,24 @@ class AVL(BST):
         else:
             raise ValueError(f"Cannot insert value {value} that already exists in the tree")
 
-        # update heights starting from most recently visited parent (goes from leaf up)
+        # update heights starting from most recently visited parent
         for node in parents:
-            self.update_height(node)
+            self._update_height(node)
 
-        # rebalance the tree when done
+        # rebalance the tree when done, from most recent parent up to root
         for i, parent in enumerate(parents):
-            self.rebalance(parent, parents[i+1] if i+1 < len(parents) else None)
+            self._rebalance(parent, parents[i + 1] if i + 1 < len(parents) else None)
 
     def delete_iter(self, value):
         # nothing to delete on an empty tree
         if not self.root:
             raise ValueError(f"Cannot delete value {value} that does not exist in the tree")
 
-        # search for the node to delete and its parent starting from root
+        # search for the node to delete and its parent
         # as well as whatever parents were visited to reach there
         # and check which side of the parent the node is on
-        node, parent, parents = self.find(value, self.root, True)
-        parent_side = self.left_or_right(node.value, parent) if parent else None
+        node, parent, parents = self._find(value, self.root, True)
+        parent_side = self._left_or_right(node.value, parent) if parent else None
 
         # can't delete if the node wasn't found
         if not node:
@@ -85,10 +86,10 @@ class AVL(BST):
                 # ONLY update the node/parent if there is at least one traversal to be done
                 # because otherwise we'll unintentionally go back to the whole tree's root and break stuff
                 if parent.right.value != parent.value:
-                    find_results = self.find(value, node, True, True)
+                    find_results = self._find(value, node, True, True)
                     node, parent = find_results[:2]
                     parents = find_results[2] + parents
-                parent_side = self.left_or_right(node.value, parent)
+                parent_side = self._left_or_right(node.value, parent)
                 continue
 
             # set the parent's child to be the new value (None for 0 child, child for 1)
@@ -101,21 +102,17 @@ class AVL(BST):
                 self.root = temp
             break
 
-        # update heights starting from most recently visited parent (goes from leaf up)
+        # update heights starting from most recently visited parent
         for node in parents:
-            self.update_height(node)
+            self._update_height(node)
 
-        # rebalance the tree when done
+        # rebalance the tree when done, from most recent parent up to root
         for i, parent in enumerate(parents):
-            self.rebalance(parent, parents[i + 1] if i + 1 < len(parents) else None)
+            self._rebalance(parent, parents[i + 1] if i + 1 < len(parents) else None)
 
-    # below this point are all helper functions that are not directly related to question 4
-
-    # this method was used to calculate the height of a given node with no prior knowledge,
+    # this method calculates the height of a given node with no prior knowledge,
     # which is now deprecated since the Node class has been updated to store its own height
     # (much quicker than running an O(n) traversal every time height was needed)
-    # note: this returns the number of levels in the tree, which is one more than what the root
-    # stores internally as its height (counting from 0 vs 1)
     def height_manual(self, node=None):
         # empty trees are considered to be height -1
         if not self.root:
@@ -128,7 +125,7 @@ class AVL(BST):
         # calculate height iteratively by performing a level-order traversal
         # use queue to track all the nodes on the current level
         queue = [node]
-        height = 0
+        height = -1
         while True:
             nodes = len(queue)
             # nodeless level indicates that the maximum height has been reached
@@ -145,7 +142,18 @@ class AVL(BST):
                     queue.append(node.right)
                 nodes -= 1
 
-    def balance_factor(self, node=None):
+    def deep_traversal(self):
+        if not self.root:
+            print("tree is empty")
+            return
+
+        # this is just for testing purposes - prints traversal of the deepest path
+        node = self.root
+        while node:
+            print(node, node.height, '>', self._height(node.left), self._height(node.right))
+            node = node.right if self._height(node.right) > self._height(node.left) else node.left
+
+    def _balance_factor(self, node=None):
         # empty trees are balanced
         if not self.root:
             return 0
@@ -155,9 +163,9 @@ class AVL(BST):
             node = self.root
 
         # return height of left tree minus height of right tree
-        return self.height(node.left) - self.height(node.right)
+        return self._height(node.left) - self._height(node.right)
 
-    def left_rotate(self, old_root, local_root):
+    def _left_rotate(self, old_root, local_root):
         # old root's right child becomes the new root and new root's left subtree becomes old root's right subtree
         new_root = old_root.right
         subtree = new_root.left
@@ -170,11 +178,11 @@ class AVL(BST):
                 local_root.right = new_root
         else:
             self.root = new_root
-        self.update_height(old_root)
-        self.update_height(new_root)
+        self._update_height(old_root)
+        self._update_height(new_root)
         return new_root
 
-    def right_rotate(self, old_root, local_root):
+    def _right_rotate(self, old_root, local_root):
         # old root's left child becomes the new root and new root's right subtree becomes old root's left subtree
         new_root = old_root.left
         subtree = new_root.right
@@ -187,62 +195,31 @@ class AVL(BST):
                 local_root.right = new_root
         else:
             self.root = new_root
-        self.update_height(old_root)
-        self.update_height(new_root)
+        self._update_height(old_root)
+        self._update_height(new_root)
         return new_root
 
-    def rebalance2(self, node, value, delete=False):
-        balance_factor = self.balance_factor(node)
+    def _rebalance(self, node, parent):
+        balance_factor = self._balance_factor(node)
 
         # left-heavy
         if balance_factor > 1:
             # extra step for left-right
-            if (delete and self.balance_factor(node.left) < 0) or (not delete and value > node.left.value):
-                print("a")
-                node.left = self.left_rotate(node.left)
-            # both left-left and left-right
-            print("b")
-            return self.right_rotate(node)
-        # right-heavy
-        if balance_factor < -1:
-            # extra step for right-left
-            if (delete and self.balance_factor(node.right) > 0) or (not delete and value < node.right.value):
-                print("c")
-                node.right = self.right_rotate(node.right)
-            # both right-right and right-left
-            print("d")
-            return self.left_rotate(node)
-        # no rebalance because tree is sufficiently balanced
-        print(f"tried to rebalance {node} with {value} but no high BF found")
-        return node
-
-    def rebalance(self, node, parent):
-        balance_factor = self.balance_factor(node)
-        #print(f"attempting rotate {node} {parent}")
-
-        # left-heavy
-        if balance_factor > 1:
-            # extra step for left-right
-            if self.balance_factor(node.left) < 0:
-                #print("LR")
-                node.left = self.left_rotate(node.left, node)
+            if self._balance_factor(node.left) < 0:
+                node.left = self._left_rotate(node.left, node)
             # both right-right and left-right
-            #print("RR or LR")
-            return self.right_rotate(node, parent)
+            return self._right_rotate(node, parent)
         # right-heavy
         if balance_factor < -1:
             # extra step for right-left
-            if self.balance_factor(node.right) > 0:
-                #print("RL")
-                node.right = self.right_rotate(node.right, node)
+            if self._balance_factor(node.right) > 0:
+                node.right = self._right_rotate(node.right, node)
             # both left-left and right-left
-            #print("LL or RL")
-            return self.left_rotate(node, parent)
+            return self._left_rotate(node, parent)
         # no rebalance because tree is sufficiently balanced
-        #print(f"tried to rebalance {node} but no high BF found")
         return node
 
-    def find(self, value, node=None, track_parents=False, decrement_path=False):
+    def _find(self, value, node=None, track_parents=False, decrement_path=False):
         # simple iterative binary search to retrieve node given its value
         node = self.root if not node else node
         parent = None
@@ -263,26 +240,12 @@ class AVL(BST):
 
         return (node, parent, parents) if track_parents else node
 
-    def update_height(self, node):
-        # note: wanted this to be static, but apparently that means it has no way of accessing self.height?
-        node.height = max(self.height(node.left), self.height(node.right)) + 1
-
-    def verify_height(self):
-        if not self.root:
-            print("tree is empty")
-            return
-
-        # this is just for testing purposes - prints traversal of the deepest path
-        node = self.root
-        while node:
-            print(node, node.height, '>', self.height(node.left), self.height(node.right))
-            node = node.right if self.height(node.right) > self.height(node.left) else node.left
-
-    # note: the following static methods don't have default values like some other methods do
-    # because there is no context in which they would be called with no node specified
+    def _update_height(self, node):
+        # note: wanted this to be static, but apparently that means it has no way of accessing self._height?
+        node.height = max(self._height(node.left), self._height(node.right)) + 1
 
     @staticmethod
-    def height(node):
+    def _height(node):
         # used to safely access height of a node if it may or may not exist
         return node.height if node else -1
 
@@ -290,5 +253,34 @@ class AVL(BST):
 if __name__ == "__main__":
     # some demo code to display each of the functions in action
     avl = AVL()
-    avl.bulk_insert([5, 3, 2, 7, 34])
+
+    # TODO: replace these with recursive versions once implemented
+    print('generate whole tree')
+    avl.sort([15, 3, 7, 6, 4, 8, 10, 17, 20, 18, 22, 16])
+    avl.display()
+    print('root:', avl.root)
+    print('max:', avl.find_max_iter())
+    print('min:', avl.find_min_iter())
+    print('root left:', avl.root.left)
+    print('root right:', avl.root.right)
+    print('root next:', avl.find_next_iter(avl.root.value))
+    print('root prev:', avl.find_prev_iter(avl.root.value))
+    print('4 prev:', avl.find_prev_iter(4))
+    print('10 next:', avl.find_next_iter(10))
+    print('18 prev:', avl.find_prev_iter(18))
+
+    # iterative methods
+    print('\ndelete 7, 6, 22, 16, 15')
+    avl.bulk_delete([7, 6, 22, 16, 15])
     print(avl)
+    avl.display()
+    print('root:', avl.root)
+    print('max:', avl.find_max_iter())
+    print('min:', avl.find_min_iter())
+    print('root left:', avl.root.left)
+    print('root right:', avl.root.right)
+    print('root next:', avl.find_next_iter(avl.root.value))
+    print('root prev:', avl.find_prev_iter(avl.root.value))
+    print('20 next:', avl.find_next_iter(20))
+    print('10 next:', avl.find_next_iter(10))
+    print('17 prev:', avl.find_prev_iter(17))
