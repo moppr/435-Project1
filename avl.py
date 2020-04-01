@@ -4,12 +4,23 @@ from bst import BST, Node
 
 class AVL(BST):
 
-    # the following methods are intentionally inherited from BST:
-    # (4c) find_next_rec, find_prev_rec, find_min_rec, find_max_rec
-    # (4d) find_next_iter, find_prev_iter, find_min_iter, find_max_iter
-    # __init__, sort, all helper methods
+    def insert_rec(self, value, node=None):
+        raise NotImplementedError
 
-    # TODO: implement recursive methods
+    def delete_rec(self, value, node=None):
+        raise NotImplementedError
+
+    def find_next_rec(self, value, node=None, next=None):
+        raise NotImplementedError
+
+    def find_prev_rec(self, value, node=None, prev=None):
+        raise NotImplementedError
+
+    def find_min_rec(self, node=None):
+        raise NotImplementedError
+
+    def find_max_rec(self, node=None):
+        raise NotImplementedError
 
     def insert_iter(self, value):
         # create root if this is the first node in the tree
@@ -57,7 +68,7 @@ class AVL(BST):
         # as well as whatever parents were visited to reach there
         # and check which side of the parent the node is on
         node, parent, parents = self._find(value, self.root, True)
-        parent_side = self._left_or_right(node.value, parent) if parent else None
+        parent_side = self._left_or_right(node.value, parent)
 
         # can't delete if the node wasn't found
         if not node:

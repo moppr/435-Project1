@@ -11,8 +11,9 @@ def get_sorted_array(n):
 
 
 if __name__ == "__main__":
-    print('random arrays x4')
-    for _ in range(4):
+    n = 4
+    print(f'random arrays x{n}')
+    for _ in range(n):
         print(get_random_array(8))
     print('\nsorted array')
     print(get_sorted_array(8))
