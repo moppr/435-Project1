@@ -4,7 +4,7 @@ from arrays import *
 from datetime import *
 
 if __name__ == "__main__":
-    random_arr = get_random_array(10000)  # works up to 10mil on my PC
+    random_arr = get_random_array(10000)  # Works up to 10,000,000 on my PC.
     sorted_arr = get_sorted_array(10000)
     bst = BST()
     avl = AVL()
@@ -26,16 +26,15 @@ if __name__ == "__main__":
     bst.clear()
     print()
 
-    # at the time of writing, there is no AVL recursive implementation
-    '''    
     try:
-        avl_random.bulk_insert(random_arr, True)
+        avl.bulk_insert(random_arr, True)
         print("AVL random recursive success")
     except RecursionError:
         print("Maximum recursion depth exceeded for avl random recursive")
+    except NotImplementedError:
+        print("AVL random recursive not implemented")
     avl.clear()
     print()
-    '''
 
     now = datetime.now()
     avl.bulk_insert(random_arr)
@@ -63,16 +62,15 @@ if __name__ == "__main__":
     bst.clear()
     print()
 
-    # at the time of writing, there is no AVL recursive implementation
-    '''    
     try:
-        avl_random.bulk_insert(sorted_arr, True)
+        avl.bulk_insert(sorted_arr, True)
         print("AVL sorted recursive success")
     except RecursionError:
         print("Maximum recursion depth exceeded for avl sorted recursive")
+    except NotImplementedError:
+        print("AVL sorted recursive not implemented")
     avl.clear()
     print()
-    '''
 
     now = datetime.now()
     avl.bulk_insert(sorted_arr)

@@ -2,7 +2,7 @@ import random
 
 
 def get_random_array(n):
-    # no constraint for the values of the array was provided, so n*10 being used arbitrarily
+    # No constraint for the values of the array was provided, so n*10 being used arbitrarily.
     return random.sample(range(0, n*10), n)
 
 

@@ -13,12 +13,16 @@ class Node:
         return str(self.value)
 
     def __eq__(self, other):
+        if isinstance(other, int):
+            return self.value == other
         return self.value == other.value
 
     def __lt__(self, other):
+        if isinstance(other, int):
+            return self.value < other
         return self.value < other.value
 
-    # adapted from https://stackoverflow.com/questions/34012886/print-binary-tree-level-by-level-in-python/34014370
+    # Adapted from https://stackoverflow.com/questions/34012886/print-binary-tree-level-by-level-in-python/34014370.
     def display(self):
         lines, _, _, _ = self._display_aux()
         for line in lines:
