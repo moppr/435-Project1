@@ -3,6 +3,7 @@ from functools import *
 
 @total_ordering
 class Node:
+    """Node of a binary tree containing value and references to each child."""
 
     def __init__(self, value):
         self.value = value
