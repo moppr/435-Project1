@@ -3,6 +3,7 @@ from bst import BST, Node
 
 
 class AVL(BST):
+    """AVL tree implementing various operations recursively and iteratively."""
 
     def insert_rec(self, value, node=None):
         raise NotImplementedError
@@ -149,7 +150,6 @@ class AVL(BST):
     def _rebalance(self, node, parent):
         balance_factor = self._balance_factor(node)
 
-        # Perform appropriate two-step rebalance, if necessary.
         if balance_factor > 1:
             if self._balance_factor(node.left) < 0:
                 node.left = self._left_rotate(node.left, node)

@@ -2,6 +2,7 @@ from node import *
 
 
 class BST:
+    """Binary search tree implementing various operations recursively and iteratively."""
 
     # TODO: implement interview problems such as isBSBST() in the context of this class
 
